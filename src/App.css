@@ -1,0 +1,15 @@
+* {
+  margin: 0px;
+  padding: 0px;
+}
+
+body {
+  background-image: linear-gradient(to right bottom, #FBDB89, #F48982);
+  background-size: cover;
+  background-repeat: no-repeat;
+  height: 90vh;
+  margin: 0;
+  padding: 5vh;
+  text-align: center;
+  font-family: 'Roboto', sans-serif;
+}
