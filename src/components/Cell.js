@@ -1,22 +1,20 @@
 import React from 'react';
 
+const Cell = ({ isAlive, id }) => {
+  const style = {
+    height: '10px',
+    width: '10px',
+    backgroundColor: 'white',
+    border: 'solid 0.5px black',
+  };
 
-const style = {
-  height: '10px',
-  width: '10px',
-  backgroundColor: 'white',
-  border: 'solid 0.5px black',
+  if (isAlive === true) {
+    style.backgroundColor = 'red';
+  }
+
+  return (
+    <div style={style} id={id} />
+  );
 };
 
-
-export default class Cell extends React.Component {
-  state = {
-    isAlive: false,
-  }
-
-  render() {
-    return (
-      <div style={style} />
-    );
-  }
-}
+export default Cell;
