@@ -1,14 +1,18 @@
 import React from 'react';
+import '../App.css';
 
-const Cell = ({ justBorn, isAlive, id }) => {
+const Cell = ({
+  justBorn, isAlive, id, onClickCell,
+}) => {
   const style = {
-    height: '10px',
-    width: '10px',
+    // height: '10px',
+    // width: '10px',
     backgroundColor: 'white',
+    cursor: 'pointer',
   };
 
   if (justBorn === true) {
-    style.backgroundColor = '#B71C1C';
+    style.backgroundColor = '#FFA726';
   } else if (isAlive === true) {
     style.backgroundColor = '#F44336';
   } else {
@@ -16,7 +20,7 @@ const Cell = ({ justBorn, isAlive, id }) => {
   }
 
   return (
-    <div style={style} id={id} />
+    <div tabIndex={0} style={style} id={id} onClick={onClickCell} role="button" className="cell" />
   );
 };
 

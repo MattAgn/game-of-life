@@ -13,7 +13,7 @@ const styles = {
     fontWeight: '300',
   },
   gridContainer: {
-    margin: '30px auto',
+    margin: '20px auto',
     boxShadow: 'rgba(0,0,0,0.19) 0px 10px 30px, rgba(0,0,0,0.23) 0px 6px 10px',
     borderRadius: '2px',
   },
@@ -41,7 +41,6 @@ const initGrid = () => {
 const countNeighbours = (cellId, cellGrid, generation) => {
   let result = 0;
   const gridHeight = gridSize[0];
-  console.log(gridHeight);
   const cellIndex = cellId % gridSize[1];
   const rowId = Math.floor(cellId / gridSize[1]);
   // center right
@@ -86,14 +85,20 @@ const countNeighbours = (cellId, cellGrid, generation) => {
 
 class App extends Component {
   state = {
-    isRunning: false,
-    isCleared: true,
+    isRunning: true,
     generation: 0,
     cellGrid: initGrid(),
+    labelRun: 'Pause',
+    speed: 1,
   }
 
   componentWillMount() {
     this.generateGridRandom();
+    setTimeout(() => {
+      if (this.state.isRunning === true) {
+        this.nextGeneration();
+      }
+    }, 1000);
   }
 
   componentDidUpdate() {
@@ -104,32 +109,20 @@ class App extends Component {
     }, 100);
   }
 
-
-  handleClickRun = () => this.setState(prevState => ({ isRunning: true }));
-
-  handleClickClear = () => this.clearGrid();
-
-  handleClickGenerate = () => this.generateGridRandom();
-
-  handleClickPause = () => this.setState({ isRunning: false });
-
-  generateGridRandom(probability = 0.75) {
+  handleClickCell = (cellId) => {
+    const rowId = Math.floor(cellId / gridSize[1]);
     const grid = this.state.cellGrid;
-    grid.forEach((row) => {
-      row.forEach((cell) => {
-        if (Math.random() > probability) {
-          cell.isAlive = [true];
-        } else {
-          cell.isAlive = [false];
-        }
-      });
-    });
-    this.setState({
-      cellGrid: grid, isCleared: false, generation: 0, isRunning: false,
-    });
+    grid[rowId][cellId % gridSize[1]].isAlive[this.state.generation] = true;
+    grid[rowId][cellId % gridSize[1]].justBorn = true;
+    this.setState({ cellGrid: grid });
   }
 
-  clearGrid() {
+  handleClickRun = () => this.setState((prevState) => {
+    if (prevState.isRunning) return { isRunning: false, labelRun: 'Run' };
+    return { isRunning: true, labelRun: 'Pause' };
+  });
+
+  handleClickClear = () => {
     const grid = this.state.cellGrid;
     grid.forEach((row) => {
       row.forEach((cell) => {
@@ -138,9 +131,33 @@ class App extends Component {
       });
     });
     this.setState({
-      cellGrid: grid, isCleared: true, generation: 0, isRunning: false,
+      cellGrid: grid, generation: 0, isRunning: false, labelRun: 'Run',
     });
   }
+
+  handleClickGenerate = () => {
+    this.setState({ isRunning: false, labelRun: 'Run' });
+    this.generateGridRandom();
+  };
+
+  generateGridRandom(probability = 0.75) {
+    const grid = this.state.cellGrid;
+    grid.forEach((row) => {
+      row.forEach((cell) => {
+        cell.justBorn = false;
+        if (Math.random() > probability) {
+          cell.isAlive = [true];
+          cell.justBorn = true;
+        } else {
+          cell.isAlive = [false];
+        }
+      });
+    });
+    this.setState({
+      cellGrid: grid, generation: 0,
+    });
+  }
+
 
   nextGeneration() {
     const grid = this.state.cellGrid;
@@ -162,7 +179,6 @@ class App extends Component {
           // console.log('dead cell : ', cell);
           cell.isAlive[nextGen] = true;
           cell.justBorn = true;
-          console.log('new cell');
         } else {
           cell.isAlive[nextGen] = false;
         }
@@ -178,22 +194,30 @@ class App extends Component {
           <h1 style={styles.title}>Game of life</h1>
           <Buttons
             onClickRun={this.handleClickRun.bind(this)}
+            labelRun={this.state.labelRun}
             onClickClear={this.handleClickClear.bind(this)}
             onClickGenerate={this.handleClickGenerate.bind(this)}
-            onClickPause={this.handleClickPause.bind(this)}
           />
           <h3 style={styles.generation}> Generation: {this.state.generation}</h3>
           <div style={styles.gridContainer}>
             {this.state.cellGrid.map(row => (
               <div style={styles.row} key={row[0].id / gridSize[1]}>
-                {row.map(cell =>
-                  (<Cell
+                {row.map(cell => (
+                  <Cell
                     key={cell.id}
                     id={cell.id}
                     isAlive={cell.isAlive[this.state.generation]}
                     justBorn={cell.justBorn}
-                  />))}
+                    onClickCell={this.handleClickCell.bind(this, cell.id)}
+                  />
+                ))}
               </div>))}
+          </div>
+          <div>
+            <p style={{ fontWeight: 300, margin: '10px' }}>
+              You can add cells while it's running.
+              Orange cells have just been born, red cells are older.
+            </p>
           </div>
         </div>
       </MuiThemeProvider>
