@@ -14,13 +14,15 @@ const styles = {
   },
   gridContainer: {
     margin: '30px auto',
+    boxShadow: 'rgba(0,0,0,0.19) 0px 10px 30px, rgba(0,0,0,0.23) 0px 6px 10px',
+    borderRadius: '2px',
   },
   row: {
     display: 'flex',
   },
 };
 
-const gridSize = [40, 60];
+const gridSize = [45, 70];
 
 const initGrid = () => {
   let id = 0;
@@ -38,17 +40,44 @@ const initGrid = () => {
 
 const countNeighbours = (cellId, cellGrid, generation) => {
   let result = 0;
+  const gridHeight = gridSize[0];
+  console.log(gridHeight);
+  const cellIndex = cellId % gridSize[1];
   const rowId = Math.floor(cellId / gridSize[1]);
-  if (cellGrid[rowId][cellId + 1].isAlive[generation]) {
+  // center right
+  if (cellIndex + 1 < gridSize[1] && cellGrid[rowId][cellIndex + 1].isAlive[generation]) {
     result++;
   }
-  if (cellGrid[rowId][cellId - 1].isAlive[generation]) {
+  // center left
+  if (cellIndex > 0 && cellGrid[rowId][cellIndex - 1].isAlive[generation]) {
     result++;
   }
-  if (cellGrid[rowId + 1][cellId].isAlive[generation]) {
+  // bottom center
+  if (rowId + 1 < gridSize[0] && cellGrid[rowId + 1][cellIndex].isAlive[generation]) {
     result++;
   }
-  if (cellGrid[rowId - 1][cellId].isAlive[generation]) {
+  // top center
+  if (rowId > 0 && cellGrid[rowId - 1][cellIndex].isAlive[generation]) {
+    result++;
+  }
+  // top left
+  if (rowId > 0 && cellIndex > 0
+    && cellGrid[rowId - 1][cellIndex - 1].isAlive[generation]) {
+    result++;
+  }
+  // top right
+  if (rowId > 0 && cellIndex + 1 < gridSize[1]
+    && cellGrid[rowId - 1][cellIndex + 1].isAlive[generation]) {
+    result++;
+  }
+  // bottom right
+  if ((rowId + 1 < gridHeight) && (cellIndex + 1 < gridSize[1])
+    && cellGrid[rowId + 1][cellIndex + 1].isAlive[generation]) {
+    result++;
+  }
+  // bottom left
+  if (rowId + 1 < gridSize[0] && cellIndex > 0
+    && cellGrid[rowId + 1][cellIndex - 1].isAlive[generation]) {
     result++;
   }
   return result;
@@ -67,16 +96,22 @@ class App extends Component {
     this.generateGridRandom();
   }
 
-  handleClickRun = () => {
-    this.setState({ isRunning: true });
-    this.nextGeneration();
+  componentDidUpdate() {
+    setTimeout(() => {
+      if (this.state.isRunning === true) {
+        this.nextGeneration();
+      }
+    }, 100);
   }
 
-  handleClickPause = () => this.setState({ isRunning: false });
+
+  handleClickRun = () => this.setState(prevState => ({ isRunning: true }));
 
   handleClickClear = () => this.clearGrid();
 
   handleClickGenerate = () => this.generateGridRandom();
+
+  handleClickPause = () => this.setState({ isRunning: false });
 
   generateGridRandom(probability = 0.75) {
     const grid = this.state.cellGrid;
@@ -89,7 +124,9 @@ class App extends Component {
         }
       });
     });
-    this.setState({ cellGrid: grid, isCleared: false, generation: 0 });
+    this.setState({
+      cellGrid: grid, isCleared: false, generation: 0, isRunning: false,
+    });
   }
 
   clearGrid() {
@@ -97,34 +134,42 @@ class App extends Component {
     grid.forEach((row) => {
       row.forEach((cell) => {
         cell.isAlive = [false];
+        cell.justBorn = false;
       });
     });
-    this.setState({ cellGrid: grid, isCleared: true, generation: 0 });
+    this.setState({
+      cellGrid: grid, isCleared: true, generation: 0, isRunning: false,
+    });
   }
 
   nextGeneration() {
     const grid = this.state.cellGrid;
     const nextGen = this.state.generation + 1;
+    // console.log('next gen', nextGen);
     grid.forEach((row) => {
       row.forEach((cell) => {
+        // console.log('Cell', cell);
         const nbNeighbours = countNeighbours(cell.id, grid, this.state.generation);
         if (cell.isAlive[this.state.generation]) {
           if (nbNeighbours < 2 || nbNeighbours > 3) {
             cell.isAlive[nextGen] = false;
+            // console.log(cell);
           } else {
             cell.isAlive[nextGen] = true;
           }
+          cell.justBorn = false;
         } else if (nbNeighbours === 3) {
+          // console.log('dead cell : ', cell);
           cell.isAlive[nextGen] = true;
+          cell.justBorn = true;
+          console.log('new cell');
+        } else {
+          cell.isAlive[nextGen] = false;
         }
       });
     });
-    this.setState({ generation: nextGen });
-    if (this.state.isRunning === true) {
-      this.nextGeneration();
-    }
+    this.setState({ generation: nextGen, cellGrid: grid });
   }
-
 
   render() {
     return (
@@ -146,6 +191,7 @@ class App extends Component {
                     key={cell.id}
                     id={cell.id}
                     isAlive={cell.isAlive[this.state.generation]}
+                    justBorn={cell.justBorn}
                   />))}
               </div>))}
           </div>

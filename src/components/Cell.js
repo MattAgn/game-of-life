@@ -1,15 +1,18 @@
 import React from 'react';
 
-const Cell = ({ isAlive, id }) => {
+const Cell = ({ justBorn, isAlive, id }) => {
   const style = {
     height: '10px',
     width: '10px',
     backgroundColor: 'white',
-    border: 'solid 0.5px black',
   };
 
-  if (isAlive === true) {
-    style.backgroundColor = 'red';
+  if (justBorn === true) {
+    style.backgroundColor = '#B71C1C';
+  } else if (isAlive === true) {
+    style.backgroundColor = '#F44336';
+  } else {
+    style.backgroundColor = 'white';
   }
 
   return (
