@@ -8,6 +8,7 @@ const styles = {
   title: {
     fontWeight: '400',
     fontSize: '28px',
+    paddingTop: '30px',
   },
   generation: {
     fontWeight: '300',
