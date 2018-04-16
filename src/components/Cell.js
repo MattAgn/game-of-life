@@ -1,5 +1,5 @@
 import React from 'react';
-import '../App.css';
+import '../style.css';
 
 const Cell = ({
   justBorn, isAlive, id, onClickCell,
