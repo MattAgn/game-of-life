@@ -1,0 +1,30 @@
+* {
+  margin: 0px;
+  padding: 0px;
+  font-family: "Roboto", sans-serif;
+}
+
+body {
+  background-image: linear-gradient(to right bottom, #fbdb89, #f48982);
+  background-size: cover;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  margin: 0;
+  /* padding: 5vh; */
+  text-align: center;
+  font-family: "Roboto", sans-serif;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+}
+
+div:focus {
+  outline: none;
+}
+
+.cell {
+  height: 1.3vh;
+  width: 1.3vh;
+}
