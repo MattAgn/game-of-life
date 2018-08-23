@@ -5,54 +5,28 @@ import "./style.css";
 import Buttons from "./components/Buttons";
 import Cell from "./components/Cell";
 
-const styles = {
-  title: {
-    fontWeight: "400",
-    fontSize: "28px",
-    paddingTop: "30px"
-  },
-  generation: {
-    fontWeight: "300"
-  },
-  gridContainer: {
-    margin: "20px auto",
-    boxShadow: "rgba(0,0,0,0.19) 0px 10px 30px, rgba(0,0,0,0.23) 0px 6px 10px",
-    borderRadius: "2px"
-  },
-  row: {
-    display: "flex"
-  }
-};
-
-const initGrid = (nbRows, nbCols) => {
-  let id = 0;
-  const grid = [];
-  for (let i = 0; i < nbRows; i++) {
-    const row = [];
-    for (let j = 0; j < nbCols; j++) {
-      row.push({ id });
-      id++;
-    }
-    grid.push(row);
-  }
-  return grid;
-};
-
 class App extends Component {
   constructor() {
     super();
-    this.nbRows = 45;
+    this.nbRows = 40;
     this.nbCols = 70;
-    this.state.cellGrid = initGrid(this.nbRows, this.nbCols);
+    this.state = {
+      isRunning: false,
+      generation: 0,
+      labelRun: "Run",
+      cellSize: 0.00001 * window.innerHeight * window.innerWidth,
+      cellGrid: this.initGrid()
+    };
   }
 
-  state = {
-    isRunning: true,
-    generation: 0,
-    labelRun: "Pause"
+  //*** LYFECYCLE METHODS ***//
+
+  componentWillUnmount = () => {
+    window.removeEventListener("resize", this.updateCellSize);
   };
 
   componentWillMount() {
+    window.addEventListener("resize", this.updateCellSize);
     this.generateGridRandom();
     setTimeout(() => {
       if (this.state.isRunning === true) {
@@ -66,8 +40,10 @@ class App extends Component {
       if (this.state.isRunning === true) {
         this.nextGeneration();
       }
-    }, 100);
+    }, 400);
   }
+
+  //*** EVENT HANDLERS ***//
 
   handleClickCell = cellId => {
     const rowId = Math.floor(cellId / this.nbCols);
@@ -104,6 +80,28 @@ class App extends Component {
     this.generateGridRandom();
   };
 
+  updateCellSize = () => {
+    this.setState({
+      cellSize: 0.00001 * window.innerHeight * window.innerWidth
+    });
+  };
+
+  initGrid = () => {
+    let id = 0;
+    const grid = [];
+    for (let i = 0; i < this.nbRows; i++) {
+      const row = [];
+      for (let j = 0; j < this.nbCols; j++) {
+        row.push({ id });
+        id++;
+      }
+      grid.push(row);
+    }
+    return grid;
+  };
+
+  //*** GAME LOGIC ***//
+
   generateGridRandom(probability = 0.75) {
     const grid = this.state.cellGrid;
     grid.forEach(row => {
@@ -124,6 +122,7 @@ class App extends Component {
   }
 
   nextGeneration() {
+    // JSON used to copy the grid
     const newGrid = JSON.parse(JSON.stringify(this.state.cellGrid));
     for (let i = 0; i < this.nbRows; i++) {
       for (let j = 0; j < this.nbCols; j++) {
@@ -217,6 +216,7 @@ class App extends Component {
               <div style={styles.row} key={row[0].id / this.nbCols}>
                 {row.map(cell => (
                   <Cell
+                    size={this.state.cellSize}
                     key={cell.id}
                     id={cell.id}
                     isAlive={cell.isAlive}
@@ -238,5 +238,24 @@ class App extends Component {
     );
   }
 }
+
+const styles = {
+  title: {
+    fontWeight: "400",
+    fontSize: "28px",
+    paddingTop: "30px"
+  },
+  generation: {
+    fontWeight: "300"
+  },
+  gridContainer: {
+    margin: "20px auto",
+    boxShadow: "rgba(0,0,0,0.19) 0px 10px 30px, rgba(0,0,0,0.23) 0px 6px 10px",
+    borderRadius: "2px"
+  },
+  row: {
+    display: "flex"
+  }
+};
 
 export default App;

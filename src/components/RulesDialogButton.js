@@ -42,9 +42,10 @@ class RulesDialogButton extends Component {
           style={style}
         >
           <p style={style}>
-            &quot; Every cell interacts with its eight neighbours, which are the
-            cells that are horizontally, vertically, or diagonally adjacent. At
-            each step in time, the following transitions occur:
+            &quot; This is a zero-player game where every colored cell
+            represents a cell. Every cell interacts with its eight neighbours,
+            which are the cells that are horizontally, vertically, or diagonally
+            adjacent. At each step in time, the following transitions occur:
           </p>
 
           <ol style={style}>
